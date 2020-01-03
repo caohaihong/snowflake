@@ -1,5 +1,6 @@
 package com.chh.www.service;
 
+import com.chh.www.bean.AtomicCounterBean;
 import com.chh.www.zk.ZKClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,35 +19,12 @@ import java.util.Properties;
 @Slf4j
 @Service
 public class TimeBaseService {
-    private long lastSequenceValue;
-    private long lastTime;
-    private long workId = -1;
 
     @Autowired
-    private ZKClient zkClient;
-    @Autowired
-    private Properties work;
+    private AtomicCounterBean atomicCounterBean;
 
     public Long get(){
-        if(workId < 0){
-            workId = Long.valueOf(work.getProperty("id"));
-        }
-        long timeMillis = System.currentTimeMillis();
-        long sequenceValue;
-        synchronized (this){
-            if(timeMillis < lastTime){
-                throw new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "时间回调");
-            }else if(timeMillis == lastTime){
-                lastSequenceValue ++;
-            }else {
-                lastSequenceValue = 0;
-                lastTime = timeMillis;
-            }
-            sequenceValue = lastSequenceValue;
-        }
-
-        log.info("time is : {}, id is : {}", timeMillis, sequenceValue);
-        return (timeMillis << 22) + (workId << 12) + sequenceValue;
+        return atomicCounterBean.getSerial();
 
     }
 }

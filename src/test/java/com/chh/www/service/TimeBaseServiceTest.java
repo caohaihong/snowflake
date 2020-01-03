@@ -25,13 +25,22 @@ public class TimeBaseServiceTest {
         int i = 0;
         int times = 10;
         while (true) {
-            long id = timeBaseService.get();
-            log.info(String.valueOf(id));
+//            long id = timeBaseService.get();
+//            log.info(String.valueOf(id));
+            Thread thread = new Thread(() -> {
+                while (true){
+                    Long id = timeBaseService.get();
+                    log.info(String.valueOf(id));
+                }
+
+            });
+            thread.setName("test-" + i);
+            thread.start();
             if(++i >= times){
                 break;
             }
         }
-//        Thread.sleep(100000);
+        Thread.sleep(100000);
     }
 
     @Test
